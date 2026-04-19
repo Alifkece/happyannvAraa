@@ -73,7 +73,7 @@ randomWords.forEach((word) => {
 let imageSources = [
 	"https://cdn.yupra.my.id/yp/1besuusc.jpg",
 	"https://cdn.yupra.my.id/yp/uw9edepm.jpg",
-	".https://cdn.yupra.my.id/yp/c5e8gg39.jpg",
+	"https://cdn.yupra.my.id/yp/c5e8gg39.jpg",
 	"https://cdn.yupra.my.id/yp/60rse47a.jpg",
 	"https://cdn.yupra.my.id/yp/75t6pksf.jpg",
 ];
@@ -192,22 +192,17 @@ const store = {
 		//请注意，用于<select>的配置值必须是字符串，除非手动将值转换为字符串
 		//在呈现时，并在更改时解析。
 		config: {
-			quality: String(IS_HIGH_END_DEVICE ? QUALITY_HIGH : QUALITY_NORMAL), // will be mirrored to a global variable named `quality` in `configDidUpdate`, for perf.
-			shell: "Random",
-			size: IS_DESKTOP
-				? "3" // Desktop default
-				: IS_HEADER
-				? "1.2" //配置文件头默认值(不必是int)
-				: "2", //手机默认
-			wordShell: true, //文字烟花 默认为开启 若不开启可修改为false
-			autoLaunch: true, //自动发射烟花
-			finale: false, //同时放更多烟花 (mặc định bỏ tích, finale sẽ do hệ thống tự chèn)
-			skyLighting: SKY_LIGHT_NORMAL + "",
-			hideControls: IS_HEADER,
-			longExposure: false,
-			scaleFactor: getDefaultScaleFactor(),
-		},
-	},
+	quality: String(QUALITY_LOW),
+	shell: "Random",
+	size: IS_DESKTOP ? "2" : "1",
+	wordShell: false,
+	autoLaunch: true,
+	finale: false,
+	skyLighting: SKY_LIGHT_DIM + "",
+	hideControls: IS_HEADER,
+	longExposure: false,
+	scaleFactor: getDefaultScaleFactor(),
+},
 
 	setState(nextState) {
 		const prevState = this.state;
@@ -934,16 +929,15 @@ function startWishesLoop() {
 
 	// Responsive: điều chỉnh timing và số lượng cho mobile
 	const isMobile = window.innerWidth <= 768;
-	const initialDelay = isMobile ? 550 : 650; // Mobile: nhanh hơn một chút
-	const intervalDelay = isMobile ? 1000 : 1200; // Giảm interval để có nhiều câu chúc hơn (từ 1200/1400 xuống 1000/1200)
-	const betweenDelay = isMobile ? 220 : 280; // Giảm delay giữa các câu một chút
+const initialDelay = isMobile ? 900 : 1000;
+const intervalDelay = isMobile ? 2200 : 2600;
+const betweenDelay = isMobile ? 350 : 450;
 
-	// Bắn vài câu đầu cho nhanh
-	const initialCount = isMobile ? 4 : 5; // Tăng số lượng ban đầu một chút (từ 3/4 lên 4/5)
+const initialCount = isMobile ? 1 : 2; // Tăng số lượng ban đầu một chút (từ 3/4 lên 4/5)
 	for (let i = 0; i < initialCount; i++) {
 		setTimeout(spawnWishMessage, i * initialDelay);
 		// Random có ảnh bay lên cùng không (35% cơ hội - tăng từ 30%)
-		if (Math.random() < 0.35 && loadedImages.length > 0) {
+		if (Math.random() < 0.08 && loadedImages.length > 0) {
 			setTimeout(spawnWishImage, i * initialDelay + 200);
 		}
 	}
@@ -956,12 +950,12 @@ function startWishesLoop() {
 			return;
 		}
 		const count = isMobile 
-			? 1 + ((Math.random() * 3) | 0)  // Mobile: 1-3 câu (tăng từ 1-2)
-			: 3 + ((Math.random() * 3) | 0); // Desktop: 2-4 câu (tăng từ 1-3)
+  ? 1
+  : 1 + ((Math.random() * 2) | 0); // Desktop: 2-4 câu (tăng từ 1-3)
 		for (let i = 0; i < count; i++) {
 			setTimeout(spawnWishMessage, i * betweenDelay);
 			
-			if (Math.random() < 0.25 && loadedImages.length > 0) {
+			if (Math.random() < 0.05 && loadedImages.length > 0) {
 				setTimeout(spawnWishImage, i * betweenDelay + 200);
 			}
 		}
@@ -1765,7 +1759,7 @@ function seqTriple() {
 
 // Đợt pháo hỗn hợp: mỗi lần bắn 1–4 quả, trộn nhiều loại shell khác nhau
 function seqMixedGroup() {
-	const groupCount = 1 + ((Math.random() * 4) | 0); // 1–4 quả
+	const groupCount = 1 + ((Math.random() * 2) | 0); // 1–4 quả
 	const positions = [0.2, 0.4, 0.6, 0.8];
 
 	for (let i = 0; i < groupCount; i++) {
@@ -1871,11 +1865,8 @@ seqSmallBarrage.lastCalled = Date.now();
 const sequences = [seqRandomShell, seqTwoRandom, seqTriple, seqPyramid, seqSmallBarrage];
 
 let isFirstSeq = true;
-const finaleCount = 32;
-let currentFinaleCount = 0;
-// Sau mỗi vài đợt bình thường sẽ tự động chèn một đợt finale (bắn nhiều pháo hoa liên tục)
-let sequencesSinceFinale = 0;
-const SEQUENCES_BEFORE_FINALE = 7; // Sau ~7 đợt thì bắn 1 finale
+const finaleCount = 10;
+const SEQUENCES_BEFORE_FINALE = 9999; // Sau ~7 đợt thì bắn 1 finale
 //随机生成一个烟花序列
 function startSequence() {
 	if (isFirstSeq) {
@@ -1917,19 +1908,16 @@ function startSequence() {
 	}
 
 	// Ưu tiên kiểu mixed group để cảm giác phong phú hơn
-	if (rand < 0.5 && !IS_HEADER) {
-		sequencesSinceFinale++;
-		return seqMixedGroup();
-	} else if (rand < 0.8 && !IS_HEADER) {
-		sequencesSinceFinale++;
-		return seqRandomShell();
-	} else if (rand < 0.93) {
-		sequencesSinceFinale++;
-		return seqTwoRandom();
-	} else {
-		sequencesSinceFinale++;
-		return seqTriple();
-	}
+	if (rand < 0.75 && !IS_HEADER) {
+  sequencesSinceFinale++;
+  return seqRandomShell();
+} else if (rand < 0.95) {
+  sequencesSinceFinale++;
+  return seqTwoRandom();
+} else {
+  sequencesSinceFinale++;
+  return seqRandomShell();
+  }
 }
 
 let activePointerCount = 0;
