@@ -192,17 +192,18 @@ const store = {
 		//请注意，用于<select>的配置值必须是字符串，除非手动将值转换为字符串
 		//在呈现时，并在更改时解析。
 		config: {
-	quality: String(QUALITY_LOW),
-	shell: "Random",
-	size: IS_DESKTOP ? "2" : "1",
-	wordShell: false,
-	autoLaunch: true,
-	finale: false,
-	skyLighting: SKY_LIGHT_DIM + "",
-	hideControls: IS_HEADER,
-	longExposure: false,
-	scaleFactor: getDefaultScaleFactor(),
-},
+			quality: String(QUALITY_LOW),
+			shell: "Random",
+			size: IS_DESKTOP ? "2" : "1",
+			wordShell: false,
+			autoLaunch: true,
+			finale: false,
+			skyLighting: SKY_LIGHT_DIM + "",
+			hideControls: IS_HEADER,
+			longExposure: false,
+			scaleFactor: getDefaultScaleFactor(),
+		},
+	},
 
 	setState(nextState) {
 		const prevState = this.state;
@@ -217,7 +218,6 @@ const store = {
 	},
 
 	// Load / persist select state to localStorage
-	// Mutates state because `store.load()` should only be called once immediately after store is created, before any subscriptions.
 	load() {
 		const serializedData = localStorage.getItem("cm_fireworks_data");
 		if (serializedData) {
@@ -240,11 +240,8 @@ const store = {
 					throw new Error("version switch should be exhaustive");
 			}
 			console.log(`Loaded config (schema version ${schemaVersion})`);
-		}
-		// Deprecated data format. Checked with care (it's not namespaced).
-		else if (localStorage.getItem("schemaVersion") === "1") {
+		} else if (localStorage.getItem("schemaVersion") === "1") {
 			let size;
-			// Attempt to parse data, ignoring if there is an error.
 			try {
 				const sizeRaw = localStorage.getItem("configSize");
 				size = typeof sizeRaw === "string" && JSON.parse(sizeRaw);
@@ -253,7 +250,6 @@ const store = {
 				console.error(e);
 				return;
 			}
-			// Only restore validated values
 			const sizeInt = parseInt(size, 10);
 			if (sizeInt >= 0 && sizeInt <= 4) {
 				this.state.config.size = String(sizeInt);
